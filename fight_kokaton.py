@@ -195,6 +195,37 @@ class Score:
         screen.blit(self.img, self.rct)
 
 
+class Explosion:
+    """
+    爆発に関するクラス
+    """
+    def __init__(self,bomb:Bomb):
+        """
+        爆発の生成
+        """
+        img = pg.image.load(f"{MAIN_DIR}/fig/explosion.gif")
+        self.imgs = [img,pg.transform.flip(img,True,False)]
+        self.index = 0
+        self.img = self.imgs[0]
+        self.rct = self.img.get_rect()
+        self.rct.center = bomb.rct.center
+        self.life = 10
+
+    def update(self,screen: pg.Surface):
+        """
+        爆発の更新
+        """
+        self.life -= 1
+        if self.life <= 0:
+            return True
+        if self.index < len(self.imgs):
+            self.index += 1
+        index = self.index%2
+        self.img = self.imgs[index]
+        screen.blit(self.img,self.rct)
+        return False
+        
+
 def main():
     global SCORE
     pg.display.set_caption("たたかえ！こうかとん")
@@ -206,6 +237,7 @@ def main():
     beams = list()
     score = Score()
     beams.append(None)
+    explosions = list()
     clock = pg.time.Clock()
     tmr = 0
     while True:
@@ -228,15 +260,17 @@ def main():
         for i,bomb in enumerate(bombs):
             for j,beam in enumerate(beams):
                 if beam is not None and beam.rct.colliderect(bomb.rct):
-                    beams[j] = None
-                    bombs[i] = None
                     bird.change_img(6,screen)
-                    SCORE += 1
-                    score.update(screen)
                     pg.display.update()
                     time.sleep(1)
+                    explosions.append(Explosion(bomb))
+                    beams[j] = None
+                    bombs[i] = None
+                    SCORE += 1
+                    score.update(screen)
         bombs = [bomb for bomb in bombs if bomb is not None]
         beams = [beam for beam in beams if beam is not None]
+        explosions = [explosion for explosion in explosions if not explosion.update(screen)]
 
         for i,beam in enumerate(beams):
             yoko,tate = check_bound(beam.rct)
