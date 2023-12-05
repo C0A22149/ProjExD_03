@@ -9,6 +9,7 @@ WIDTH = 1600  # ゲームウィンドウの幅
 HEIGHT = 900  # ゲームウィンドウの高さ
 MAIN_DIR = os.path.split(os.path.abspath(__file__))[0]
 NUM_OF_BOMBS = 5
+SCORE = 0
 
 
 def check_bound(obj_rct: pg.Rect) -> tuple[bool, bool]:
@@ -164,8 +165,34 @@ class Beam:
         screen.blit(self.beam, self.rct)
 
 
+class Score:
+    """
+    スコアに関するクラス
+    """
+    def __init__(self):
+        """
+        スコア表示生成
+        """
+        global SCORE
+        self.font = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 30)
+        color = (0,0,255)
+        self.img = self.font.render(f"スコア：{SCORE}", 0, color)
+        # self.img.set_colorkey((0, 0, 0))
+        self.rct = self.img.get_rect()
+        self.rct.center = 70,HEIGHT-100, 
+
+    def update(self,screen: pg.Surface):
+        """
+        スコアを更新
+        """
+        color = (0,0,255)
+        self.img = self.font.render(f"スコア：{SCORE}", 0, color)
+        # self.img.set_colorkey((0, 0, 0))
+        screen.blit(self.img, self.rct)
+
 
 def main():
+    global SCORE
     pg.display.set_caption("たたかえ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))    
     bg_img = pg.image.load(f"{MAIN_DIR}/fig/pg_bg.jpg")
@@ -173,6 +200,7 @@ def main():
     # bomb = Bomb((255, 0, 0), 10) 
     bombs = [Bomb() for _ in range(NUM_OF_BOMBS)]
     beams = list()
+    score = Score()
     beams.append(None)
     clock = pg.time.Clock()
     tmr = 0
@@ -199,6 +227,8 @@ def main():
                     beams[j] = None
                     bombs[i] = None
                     bird.change_img(6,screen)
+                    SCORE += 1
+                    score.update(screen)
                     pg.display.update()
                     time.sleep(1)
         bombs = [bomb for bomb in bombs if bomb is not None]
@@ -218,6 +248,7 @@ def main():
         for beam in beams:
             if beam:
                 beam.update(screen)
+        score.update(screen)
         pg.display.update()
         tmr += 1
         clock.tick(50)
