@@ -2,7 +2,6 @@ import os
 import random
 import sys
 import time
-
 import pygame as pg
 
 
@@ -44,7 +43,9 @@ class Bird:
         """
         img0 = pg.transform.rotozoom(pg.image.load(f"{MAIN_DIR}/fig/{num}.png"), 0, 2.0)
         img = pg.transform.flip(img0, True, False)  # デフォルトのこうかとん（右向き）
+        self.img = img
         self.imgs = {  # 0度から反時計回りに定義
+            (0,  0): img,
             (+5, 0): img,  # 右
             (+5, -5): pg.transform.rotozoom(img, 45, 1.0),  # 右上
             (0, -5): pg.transform.rotozoom(img, 90, 1.0),  # 上
@@ -54,14 +55,14 @@ class Bird:
             (0, +5): pg.transform.rotozoom(img, -90, 1.0),  # 下
             (+5, +5): pg.transform.rotozoom(img, -45, 1.0),  # 右下
         }
-        self.img = pg.transform.flip(  # 左右反転
-            pg.transform.rotozoom(  # 2倍に拡大
-                pg.image.load(f"{MAIN_DIR}/fig/{num}.png"), 
-                0, 
-                2.0), 
-            True, 
-            False
-        )
+        # self.img = pg.transform.flip(  # 左右反転
+        #     pg.transform.rotozoom(  # 2倍に拡大
+        #         pg.image.load(f"{MAIN_DIR}/fig/{num}.png"), 
+        #         0, 
+        #         2.0), 
+        #     True, 
+        #     False
+        # )
         self.rct = self.img.get_rect()
         self.rct.center = xy
 
@@ -88,7 +89,7 @@ class Bird:
         self.rct.move_ip(sum_mv)
         if check_bound(self.rct) != (True, True):
             self.rct.move_ip(-sum_mv[0], -sum_mv[1])
-        
+        self.img = self.imgs[tuple(sum_mv)]
         screen.blit(self.img, self.rct)
 
 
