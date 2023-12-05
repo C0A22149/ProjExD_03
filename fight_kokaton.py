@@ -2,6 +2,7 @@ import os
 import random
 import sys
 import time
+import math
 import pygame as pg
 
 
@@ -43,6 +44,7 @@ class Bird:
         引数1 num：こうかとん画像ファイル名の番号
         引数2 xy：こうかとん画像の位置座標タプル
         """
+        self.dire = (+5,0)
         img0 = pg.transform.rotozoom(pg.image.load(f"{MAIN_DIR}/fig/{num}.png"), 0, 2.0)
         img = pg.transform.flip(img0, True, False)  # デフォルトのこうかとん（右向き）
         self.img = img
@@ -93,6 +95,8 @@ class Bird:
             self.rct.move_ip(-sum_mv[0], -sum_mv[1])
         self.img = self.imgs[tuple(sum_mv)]
         screen.blit(self.img, self.rct)
+        if sum_mv != [0,0]:
+            self.dire = tuple(sum_mv)
 
 
 class Bomb:
@@ -149,12 +153,12 @@ class Beam:
         ビーム画像Surfaceを生成する
         引数2 xy：こうかとん画像の位置座標タプル
         """
-        self.beam = pg.transform.rotozoom(pg.image.load(f"{MAIN_DIR}/fig/beam.png"), 0, 1.0)
-        # imgL = pg.transform.flip(self.imgR, True, False)  # デフォルトのこうかとん（右向き）
+        self.vx, self.vy = bird.dire[0],bird.dire[1]
+        shi_ta = math.atan2(-self.vy,self.vx)
+        self.beam = pg.transform.rotozoom(pg.image.load(f"{MAIN_DIR}/fig/beam.png"), math.degrees(shi_ta), 1.0)
         self.rct = self.beam.get_rect()
-        self.rct.centery = bird.rct.centery
-        self.rct.centerx = bird.rct.centerx + bird.rct.width/2
-        self.vx, self.vy = +5, 0
+        self.rct.centery = bird.rct.centery + bird.rct.height * self.vy / 5
+        self.rct.centerx = bird.rct.centerx + bird.rct.width * self.vx / 5
 
     def update(self, screen: pg.Surface):
         """
