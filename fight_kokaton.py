@@ -88,6 +88,7 @@ class Bird:
         self.rct.move_ip(sum_mv)
         if check_bound(self.rct) != (True, True):
             self.rct.move_ip(-sum_mv[0], -sum_mv[1])
+        
         screen.blit(self.img, self.rct)
 
 
@@ -122,22 +123,48 @@ class Bomb:
         screen.blit(self.img, self.rct)
 
 
+class Beam:
+    """
+    ビームに関するクラス
+    """
+    def __init__(self, bird:Bird):
+        """
+        ビーム画像Surfaceを生成する
+        引数2 xy：こうかとん画像の位置座標タプル
+        """
+        self.beam = pg.transform.rotozoom(pg.image.load(f"{MAIN_DIR}/fig/beam.png"), 0, 1.0)
+        # imgL = pg.transform.flip(self.imgR, True, False)  # デフォルトのこうかとん（右向き）
+        self.rct = self.beam.get_rect()
+        self.rct.center = bird.rct.center
+        self.rct.move_ip(+1,0)
+        self.vx, self.vy = +5, 0
+
+    def update(self, screen: pg.Surface):
+        """
+        ビームを速度ベクトルself.vx, self.vyに基づき移動させる
+        引数 screen：画面Surface
+        """
+        self.rct.move_ip(self.vx, self.vy)
+        screen.blit(self.beam, self.rct)
+
+
+
 def main():
     pg.display.set_caption("たたかえ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))    
     bg_img = pg.image.load(f"{MAIN_DIR}/fig/pg_bg.jpg")
     bird = Bird(3, (900, 400))
     bomb = Bomb((255, 0, 0), 10)
-
+    beam = None
     clock = pg.time.Clock()
     tmr = 0
-    screen.blit(bg_img, [0, 0])
     while True:
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 return
-        
-
+            if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:#スペースキーが押されたとき
+                beam = Beam(bird)#ビームインスタンスの生成
+        screen.blit(bg_img, [0, 0])
         
         if bird.rct.colliderect(bomb.rct):
             # ゲームオーバー時に，こうかとん画像を切り替え，1秒間表示させる
@@ -147,9 +174,10 @@ def main():
             return
 
         key_lst = pg.key.get_pressed()
-        bird.change_img(key_lst,)
         bird.update(key_lst, screen)
         bomb.update(screen)
+        if beam:
+            beam.update(screen)
         pg.display.update()
         tmr += 1
         clock.tick(50)
