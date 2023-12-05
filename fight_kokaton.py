@@ -205,7 +205,7 @@ class Explosion:
         """
         img = pg.image.load(f"{MAIN_DIR}/fig/explosion.gif")
         self.imgs = [img,pg.transform.flip(img,True,False)]
-        self.index = 0
+        self.index = 0 #画像イメージ順番
         self.img = self.imgs[0]
         self.rct = self.img.get_rect()
         self.rct.center = bomb.rct.center
